@@ -91,12 +91,14 @@ void setup() {
 }
 
 String generateRemoteControlPage() {
-  String remotePage = "<html><body>";
+  String remotePage = "<html><head><style>";
+  remotePage += ".button { padding: 20px; font-size: 24px; }";
+  remotePage += "</style></head><body>";
   remotePage += "<h1>ESP32 Remote Control</h1>";
   remotePage += "<form action='/control' method='post'>";
-  remotePage += "<button type='submit' name='command' value='forward'>Forward</button>";
-  remotePage += "<button type='submit' name='command' value='backward'>Backward</button>";
-  remotePage += "<button type='submit' name='command' value='stop'>Stop</button>";
+  remotePage += "<button type='submit' class='button' name='command' value='forward'>&#8593;</button>"; // Up arrow
+  remotePage += "<button type='submit' class='button' name='command' value='stop' style='color: red;'>&#11044;</button>"; // Red circle
+  remotePage += "<button type='submit' class='button' name='command' value='backward'>&#8595;</button>"; // Down arrow
   remotePage += "</form></body></html>";
   return remotePage;
 }
