@@ -91,16 +91,18 @@ void setup() {
 }
 
 String generateRemoteControlPage() {
-  String remotePage = "<html><head><style>";
-  remotePage += ".button { padding: 20px; font-size: 24px; }";
-  remotePage += "</style></head><body>";
-  remotePage += "<h1>ESP32 Remote Control</h1>";
-  remotePage += "<form action='/control' method='post'>";
-  remotePage += "<button type='submit' class='button' name='command' value='forward'>&#8593;</button>"; // Up arrow
-  remotePage += "<button type='submit' class='button' name='command' value='stop' style='color: red;'>&#11044;</button>"; // Red circle
-  remotePage += "<button type='submit' class='button' name='command' value='backward'>&#8595;</button>"; // Down arrow
-  remotePage += "</form></body></html>";
-  return remotePage;
+  String remote_page = "<html><head><style>";
+  remote_page += "body { text-align: center; }";
+  remote_page += "button { font-size: 24px; padding: 15px 20px; margin: 10px; }";
+  remote_page += "</style></head><body>";
+  remote_page += "<h1 style='text-align: center'>DocOckBot Remote Control</h1>";
+  remote_page += "<div class='container' style='border: 20px solid black; text-align: center;'>";
+  remote_page += "<form action='/control' method='post'>";
+  remote_page += "<button type='submit' name='command' value='forward' style='font-size: 100px; width: 50%; border: 4px solid #04AA6D; margin:10px;'>&#8679;</button><br>";
+  remote_page += "<button type='submit' name='command' value='stop' style='font-size:100px; width: 50%; border: 4px solid red; margin:10px;'>&#10005;</button><br>";
+  remote_page += "<button type='submit' name='command' value='backward' style='font-size: 100px; width: 50%; border: 4px solid #04AA6D; margin:10px;'>&#8681;</button><br>";
+  remote_page += "</div></form></body></html>";
+  return remote_page;
 }
 
 void controlFrontMotorsSpeed(int speed) {
