@@ -82,17 +82,24 @@ void setup() {
       
       // Perform action based on the received command
       if (command == "forward") {
+        controlFrontMotorsSpeed(255);
+        controlMiddleMotorsSpeed(255);
+        controlBackMotorsSpeed(255);
         // TODO: Code to move forward
         Serial.println("Moving forward");
       } else if (command == "backward") {
         // TODO: Code to move backward
         Serial.println("Moving backward");
       } else if (command == "stop") {
+        controlFrontMotorsSpeed(0);
+        controlMiddleMotorsSpeed(0);
+        controlBackMotorsSpeed(0);
         // TODO: Code to stop movement
         Serial.println("Stop");
       }
     }
-    request->send(200, "text/plain", "OK");
+    request->send(200, "text/html", generateRemoteControlPage());
+    // request->send(200, "text/plain", "OK");
   });
 
   // Start server
