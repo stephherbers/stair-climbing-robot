@@ -8,17 +8,21 @@
 #include <Wire.h>
 
 // Define motor control pins
-const int frontPWM = 3;
-const int frontRightDirection = 4;
-const int frontLeftDirection = 5;
+const int frontPWM = 13;
+const int frontRightDirection = 5;
+const int frontLeftDirection = 4;
 
-const int middlePWM = 3;
-const int middleRightDirection = 4;
-const int middleLeftDirection = 5;
+const int middlePWM = 12;
+const int middleRightDirection = 16;
+const int middleLeftDirection = 17;
 
-const int backPWM = 3;
-const int backRightDirection = 4;
-const int backLeftDirection = 5;
+const int backPWM = 14;
+const int backRightDirection = 18;
+const int backLeftDirection = 19;
+
+const int frequency = 500;
+const int pwm_channel = 0;
+const int resolution = 8;
 
 Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 int sda_pin=21, scl_pin=22; //LiDAR pins
@@ -44,6 +48,11 @@ void setup() {
   pinMode(backPWM, OUTPUT);
   pinMode(backRightDirection, OUTPUT);
   pinMode(backLeftDirection, OUTPUT);
+
+  edcSetup(pwm_channel, frequency, resolution);
+  ledcAttachPin(frontPWM, pwm_channel);
+  ledcAttachPin(middlePWM, pwm_channel);
+  ledcAttachPin(backPWM, pwm_channel);
 
   //LiDAR Setup
   Wire.begin(sda_pin, scl_pin);
@@ -108,19 +117,19 @@ String generateRemoteControlPage() {
 void controlFrontMotorsSpeed(int speed) {
     digitalWrite(frontRightDirection, HIGH); // Set direction to forward
     digitalWrite(frontLeftDirection, HIGH);
-    analogWrite(frontPWM, speed); // Set speed (0-255)
+    ledcWrite(pwm_channel, speed);
 }
 
 void controlMiddleMotorsSpeed(int speed) {
     digitalWrite(middleRightDirection, HIGH);
     digitalWrite(middleLeftDirection, HIGH);
-    analogWrite(middlePWM, speed);
+    ledcWrite(pwm_channel, speed);
 }
 
 void controlBackMotorsSpeed(int speed) {
     digitalWrite(backRightDirection, HIGH);
     digitalWrite(backLeftDirection, HIGH);
-    analogWrite(backPWM, speed);
+    ledcWrite(pwm_channel, speed);
 }
 
 void loop() {
