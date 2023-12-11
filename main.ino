@@ -9,16 +9,16 @@
 
 // Define motor control pins
 const int frontPWM = 13;
-const int frontRightDirection = 5;
-const int frontLeftDirection = 4;
+const int front1Direction = 5;
+const int front2Direction = 4;
 
 const int middlePWM = 12;
-const int middleRightDirection = 16;
-const int middleLeftDirection = 17;
+const int middle1Direction = 16;
+const int middle2Direction = 17;
 
 const int backPWM = 14;
-const int backRightDirection = 18;
-const int backLeftDirection = 19;
+const int back1Direction = 18;
+const int back2Direction = 19;
 
 const int frequency = 500;
 const int pwm_channel = 0;
@@ -38,16 +38,16 @@ void setup() {
 
   // Set the motor control pins as outputs
   pinMode(frontPWM, OUTPUT);
-  pinMode(frontRightDirection, OUTPUT);
-  pinMode(frontLeftDirection, OUTPUT);
+  pinMode(front1Direction, OUTPUT);
+  pinMode(front2Direction, OUTPUT);
 
   pinMode(middlePWM, OUTPUT);
-  pinMode(middleRightDirection, OUTPUT);
-  pinMode(middleLeftDirection, OUTPUT);
+  pinMode(middle1Direction, OUTPUT);
+  pinMode(middle2Direction, OUTPUT);
 
   pinMode(backPWM, OUTPUT);
-  pinMode(backRightDirection, OUTPUT);
-  pinMode(backLeftDirection, OUTPUT);
+  pinMode(back1Direction, OUTPUT);
+  pinMode(back2tDirection, OUTPUT);
 
   edcSetup(pwm_channel, frequency, resolution);
   ledcAttachPin(frontPWM, pwm_channel);
@@ -122,20 +122,20 @@ String generateRemoteControlPage() {
 }
 
 void controlFrontMotorsSpeed(int speed) {
-    digitalWrite(frontRightDirection, HIGH); // Set direction to forward
-    digitalWrite(frontLeftDirection, HIGH);
+    digitalWrite(front1Direction, HIGH); // Set direction to forward
+    digitalWrite(front2Direction, LOW);
     ledcWrite(pwm_channel, speed);
 }
 
 void controlMiddleMotorsSpeed(int speed) {
-    digitalWrite(middleRightDirection, HIGH);
-    digitalWrite(middleLeftDirection, HIGH);
+    digitalWrite(middle1Direction, HIGH);
+    digitalWrite(middle2Direction, LOW);
     ledcWrite(pwm_channel, speed);
 }
 
 void controlBackMotorsSpeed(int speed) {
-    digitalWrite(backRightDirection, HIGH);
-    digitalWrite(backLeftDirection, HIGH);
+    digitalWrite(back1Direction, HIGH);
+    digitalWrite(back2Direction, LOW);
     ledcWrite(pwm_channel, speed);
 }
 
