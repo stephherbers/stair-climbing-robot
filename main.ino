@@ -2,7 +2,7 @@
 
 #include "Adafruit_VL53L0X.h"
 #include <AsyncTCP.h>
-#include <AsyncWebServer.h>
+#include <ESPAsyncWebSrv.h>
 #include <ESP32Servo.h>
 #include "WiFi.h"
 #include <Wire.h>
@@ -24,8 +24,8 @@ const int frequency = 500;
 const int pwm_channel = 0;
 const int resolution = 8;
 
-Adafruit_VL53L0X lox = Adafruit_VL53L0X();
-int sda_pin=21, scl_pin=22; //LiDAR pins
+// Adafruit_VL53L0X lox = Adafruit_VL53L0X();
+// int sda_pin=21, scl_pin=22; //LiDAR pins
 
 const char* ssid = "Tufts_Robot";
 const char* password = "";
@@ -47,19 +47,19 @@ void setup() {
 
   pinMode(backPWM, OUTPUT);
   pinMode(back1Direction, OUTPUT);
-  pinMode(back2tDirection, OUTPUT);
+  pinMode(back2Direction, OUTPUT);
 
-  edcSetup(pwm_channel, frequency, resolution);
+  ledcSetup(pwm_channel, frequency, resolution);
   ledcAttachPin(frontPWM, pwm_channel);
   ledcAttachPin(middlePWM, pwm_channel);
   ledcAttachPin(backPWM, pwm_channel);
 
-  //LiDAR Setup
-  Wire.begin(sda_pin, scl_pin);
-  if (!lox.begin()) {
-    Serial.println(F("Failed to boot VL53L0X"));
-  while(1);
-  }
+  // //LiDAR Setup
+  // Wire.begin(sda_pin, scl_pin);
+  // if (!lox.begin()) {
+  //   Serial.println(F("Failed to boot VL53L0X"));
+  // while(1);
+  //}
 
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
@@ -82,19 +82,19 @@ void setup() {
       
       // Perform action based on the received command
       if (command == "forward") {
-        controlFrontMotorsSpeed(255);
-        controlMiddleMotorsSpeed(255);
-        controlBackMotorsSpeed(255);
-        // TODO: Code to move forward
+        controlFrontMotorsSpeed(255, true);
+        controlMiddleMotorsSpeed(255, true);
+        controlBackMotorsSpeed(255, true);
         Serial.println("Moving forward");
       } else if (command == "backward") {
-        // TODO: Code to move backward
+        controlFrontMotorsSpeed(255, false);
+        controlMiddleMotorsSpeed(255, false);
+        controlBackMotorsSpeed(255, false);
         Serial.println("Moving backward");
       } else if (command == "stop") {
-        controlFrontMotorsSpeed(0);
-        controlMiddleMotorsSpeed(0);
-        controlBackMotorsSpeed(0);
-        // TODO: Code to stop movement
+        controlFrontMotorsSpeed(0, true);
+        controlMiddleMotorsSpeed(0, true);
+        controlBackMotorsSpeed(0, true);
         Serial.println("Stop");
       }
     }
@@ -121,31 +121,46 @@ String generateRemoteControlPage() {
   return remote_page;
 }
 
-void controlFrontMotorsSpeed(int speed) {
-    digitalWrite(front1Direction, HIGH); // Set direction to forward
-    digitalWrite(front2Direction, LOW);
+void controlFrontMotorsSpeed(int speed, bool forward) {
+    if (forward) {
+      digitalWrite(front1Direction, HIGH); // Set direction to forward
+      digitalWrite(front2Direction, LOW);
+    } else {
+      digitalWrite(front1Direction, LOW); // Set direction to forward
+      digitalWrite(front2Direction, HIGH);
+    }
     ledcWrite(pwm_channel, speed);
 }
 
-void controlMiddleMotorsSpeed(int speed) {
+void controlMiddleMotorsSpeed(int speed, bool forward) {
+  if (forward) {
     digitalWrite(middle1Direction, HIGH);
     digitalWrite(middle2Direction, LOW);
+  } else {
+    digitalWrite(middle1Direction, LOW);
+    digitalWrite(middle2Direction, HIGH);   
+  }
     ledcWrite(pwm_channel, speed);
 }
 
-void controlBackMotorsSpeed(int speed) {
+void controlBackMotorsSpeed(int speed, bool forward) {
+  if (forward) {
     digitalWrite(back1Direction, HIGH);
     digitalWrite(back2Direction, LOW);
+  } else {
+    digitalWrite(back1Direction, LOW);
+    digitalWrite(back2Direction, HIGH);    
+  }
     ledcWrite(pwm_channel, speed);
 }
 
 void loop() {
-  VL53L0X_RangingMeasurementData_t measure;
-  lox.rangingTest(&measure, false);
+  // VL53L0X_RangingMeasurementData_t measure;
+  // lox.rangingTest(&measure, false);
 
-  float distanceToStair = measure.RangeMilliMeter; // lidar output in mm
+  // float distanceToStair = measure.RangeMilliMeter; // lidar output in mm
 
-  controlFrontMotorsSpeed(150);
-  controlMiddleMotorsSpeed(150);
-  controlBackMotorsSpeed(150);
+  controlFrontMotorsSpeed(0, true);
+  controlMiddleMotorsSpeed(0, true);
+  controlBackMotorsSpeed(0, true);
 }
