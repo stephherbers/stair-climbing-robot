@@ -24,6 +24,8 @@ const int frequency = 500;
 const int pwm_channel = 0;
 const int resolution = 8;
 
+int dir_flag = 0;
+
 // Adafruit_VL53L0X lox = Adafruit_VL53L0X();
 // int sda_pin=21, scl_pin=22; //LiDAR pins
 
@@ -40,14 +42,22 @@ void setup() {
   pinMode(frontPWM, OUTPUT);
   pinMode(front1Direction, OUTPUT);
   pinMode(front2Direction, OUTPUT);
+  digitalWrite(front1Direction, LOW);
+  digitalWrite(front2Direction, LOW);
+  
+  
 
   pinMode(middlePWM, OUTPUT);
   pinMode(middle1Direction, OUTPUT);
   pinMode(middle2Direction, OUTPUT);
+  digitalWrite(middle1Direction, LOW);
+  digitalWrite(middle2Direction, LOW);
 
   pinMode(backPWM, OUTPUT);
   pinMode(back1Direction, OUTPUT);
   pinMode(back2Direction, OUTPUT);
+  digitalWrite(back1Direction, LOW);
+  digitalWrite(back2Direction, LOW);
 
   ledcSetup(pwm_channel, frequency, resolution);
   ledcAttachPin(frontPWM, pwm_channel);
@@ -68,8 +78,8 @@ void setup() {
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to WiFi");
+  Serial.println(WiFi.localIP());
 
-  // Route for root / webpage
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/html", generateRemoteControlPage());
   });
@@ -82,24 +92,17 @@ void setup() {
       
       // Perform action based on the received command
       if (command == "forward") {
-        controlFrontMotorsSpeed(255, true);
-        controlMiddleMotorsSpeed(255, true);
-        controlBackMotorsSpeed(255, true);
+        dir_flag = 1;
         Serial.println("Moving forward");
       } else if (command == "backward") {
-        controlFrontMotorsSpeed(255, false);
-        controlMiddleMotorsSpeed(255, false);
-        controlBackMotorsSpeed(255, false);
+        dir_flag = 2;
         Serial.println("Moving backward");
       } else if (command == "stop") {
-        controlFrontMotorsSpeed(0, true);
-        controlMiddleMotorsSpeed(0, true);
-        controlBackMotorsSpeed(0, true);
+        dir_flag = 0;
         Serial.println("Stop");
       }
     }
     request->send(200, "text/html", generateRemoteControlPage());
-    // request->send(200, "text/plain", "OK");
   });
 
   // Start server
@@ -122,45 +125,54 @@ String generateRemoteControlPage() {
 }
 
 void controlFrontMotorsSpeed(int speed, bool forward) {
+  ledcWrite(pwm_channel, speed);
     if (forward) {
-      digitalWrite(front1Direction, HIGH); // Set direction to forward
-      digitalWrite(front2Direction, LOW);
-    } else {
       digitalWrite(front1Direction, LOW); // Set direction to forward
       digitalWrite(front2Direction, HIGH);
+    } else {
+      digitalWrite(front1Direction, HIGH); // Set direction to backwards
+      digitalWrite(front2Direction, LOW);
     }
-    ledcWrite(pwm_channel, speed);
 }
 
 void controlMiddleMotorsSpeed(int speed, bool forward) {
+  ledcWrite(pwm_channel, speed);
   if (forward) {
-    digitalWrite(middle1Direction, HIGH);
-    digitalWrite(middle2Direction, LOW);
-  } else {
     digitalWrite(middle1Direction, LOW);
-    digitalWrite(middle2Direction, HIGH);   
+    digitalWrite(middle2Direction, HIGH);
+  } else {
+    digitalWrite(middle1Direction, HIGH);
+    digitalWrite(middle2Direction, LOW);   
   }
-    ledcWrite(pwm_channel, speed);
 }
 
 void controlBackMotorsSpeed(int speed, bool forward) {
+  ledcWrite(pwm_channel, speed);
   if (forward) {
-    digitalWrite(back1Direction, HIGH);
-    digitalWrite(back2Direction, LOW);
-  } else {
     digitalWrite(back1Direction, LOW);
-    digitalWrite(back2Direction, HIGH);    
+    digitalWrite(back2Direction, HIGH);
+  } else {
+    digitalWrite(back1Direction, HIGH);
+    digitalWrite(back2Direction, LOW);    
   }
-    ledcWrite(pwm_channel, speed);
 }
 
 void loop() {
+  if (dir_flag == 1) {
+    controlFrontMotorsSpeed(255, true);
+    controlMiddleMotorsSpeed(255, true);
+    controlBackMotorsSpeed(255, true);
+  } else if (dir_flag == 2) {
+    controlFrontMotorsSpeed(255, false);
+    controlMiddleMotorsSpeed(255, false);
+    controlBackMotorsSpeed(255, false);
+  } else {
+    controlFrontMotorsSpeed(0, true);
+    controlMiddleMotorsSpeed(0, true);
+    controlBackMotorsSpeed(0, true);
+  }
   // VL53L0X_RangingMeasurementData_t measure;
   // lox.rangingTest(&measure, false);
 
   // float distanceToStair = measure.RangeMilliMeter; // lidar output in mm
-
-  controlFrontMotorsSpeed(0, true);
-  controlMiddleMotorsSpeed(0, true);
-  controlBackMotorsSpeed(0, true);
 }
