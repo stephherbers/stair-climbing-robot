@@ -1,6 +1,7 @@
 //author: Steph Herbers
 
 #include "Adafruit_VL53L0X.h"
+#include <Adafruit_MPU6050.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebSrv.h>
 #include <ESP32Servo.h>
@@ -26,8 +27,10 @@ const int resolution = 8;
 
 int dir_flag = 0;
 
-// Adafruit_VL53L0X lox = Adafruit_VL53L0X();
-// int sda_pin=21, scl_pin=22; //LiDAR pins
+Adafruit_VL53L0X lox = Adafruit_VL53L0X();
+int sda_pin=21, scl_pin=22; //LiDAR pins
+
+Adafruit_MPU6050 mpu; //IMU setup
 
 const char* ssid = "Tufts_Robot";
 const char* password = "";
@@ -44,8 +47,6 @@ void setup() {
   pinMode(front2Direction, OUTPUT);
   digitalWrite(front1Direction, LOW);
   digitalWrite(front2Direction, LOW);
-  
-  
 
   pinMode(middlePWM, OUTPUT);
   pinMode(middle1Direction, OUTPUT);
@@ -64,12 +65,21 @@ void setup() {
   ledcAttachPin(middlePWM, pwm_channel);
   ledcAttachPin(backPWM, pwm_channel);
 
-  // //LiDAR Setup
-  // Wire.begin(sda_pin, scl_pin);
-  // if (!lox.begin()) {
-  //   Serial.println(F("Failed to boot VL53L0X"));
-  // while(1);
-  //}
+  //LiDAR Setup
+  Wire.begin(sda_pin, scl_pin);
+  if (!lox.begin()) {
+    Serial.println(F("Failed to boot VL53L0X"));
+  while(1);
+  }
+
+  //IMU setup
+  if (!mpu.begin()) {
+    Serial.println("Failed to find MPU6050 chip");
+    while (1) {
+      delay(10);
+    }
+  }
+  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
 
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
@@ -105,7 +115,6 @@ void setup() {
     request->send(200, "text/html", generateRemoteControlPage());
   });
 
-  // Start server
   server.begin();
 }
 
@@ -171,8 +180,11 @@ void loop() {
     controlMiddleMotorsSpeed(0, true);
     controlBackMotorsSpeed(0, true);
   }
-  // VL53L0X_RangingMeasurementData_t measure;
-  // lox.rangingTest(&measure, false);
+  VL53L0X_RangingMeasurementData_t measure;
+  lox.rangingTest(&measure, false);
 
-  // float distanceToStair = measure.RangeMilliMeter; // lidar output in mm
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+
+  float distanceToStair = measure.RangeMilliMeter; // lidar output in mm
 }
